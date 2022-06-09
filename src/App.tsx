@@ -10,6 +10,7 @@ import {
   HStack,
   PinInput,
   PinInputField,
+  Text,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -19,7 +20,8 @@ import axios from "axios";
 export default function App() {
   const { colorMode, toggleColorMode } = useColorMode();
   const [pin, setPin] = useState("");
-  const [shareKey, setShareKey] = useState("");
+  const [text, setText] = useState("000000");
+  const [timeStamp, setTimeStamp] = useState(0);
 
   const handleChangePin = (value: string) => {
     setPin(value);
@@ -27,35 +29,35 @@ export default function App() {
 
   const handleGenOTP = () => {
     const sharedKey = createSharedKey(pin);
-    console.log({ sharedKey });
-    // setShareKey(sharedKey);
-    // axios
-    //   .post("http://192.168.1.21/createOtpPin", {
-    //     mobileNumber: "0386170836",
-    //     sharedKey,
-    //     deviceId: "iPhone13pro,2",
-    //   })
-    //   .then((res) => {
-    //     console.log(res);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    axios
+      .post("http://192.168.1.21:3000/createOtpPin", {
+        mobileNumber: "0386170836",
+        sharedKey,
+        deviceId: "iPhone13pro,2",
+      })
+      .then((res) => {
+        const { smartOtp, now } = createSmartOtp(sharedKey);
+        setText(smartOtp);
+        setTimeStamp(now);
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   const handleCheck = () => {
-    // const { newOtp, now } = createSmartOtp(shareKey);
-    // axios
-    //   .post("http://192.168.1.21/confirmOTP", {
-    //     clientOTP: newOtp,
-    //     time: now,
-    //     deviceId: "iPhone13pro,2",
-    //   })
-    //   .then((res) => {
-    //     console.log(res);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    axios
+      .post("http://192.168.1.21:3000/confirmOTP", {
+        clientOTP: text,
+        time: timeStamp,
+        deviceId: "iPhone13pro,2",
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const LogoSpin = motion(Image);
@@ -88,6 +90,7 @@ export default function App() {
           </PinInput>
         </HStack>
         <Button onClick={handleGenOTP}>Gen smart otp</Button>
+        <Text>{text}</Text>
         <Button onClick={handleCheck}>Check smart otp</Button>
       </VStack>
     </Container>
