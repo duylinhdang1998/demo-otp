@@ -5,7 +5,6 @@ import {
   Flex,
   Image,
   Spacer,
-  useColorMode,
   VStack,
   HStack,
   PinInput,
@@ -18,7 +17,6 @@ import { createSharedKey, createSmartOtp } from "./utils/smartOtp";
 import axios from "axios";
 
 export default function App() {
-  const { colorMode, toggleColorMode } = useColorMode();
   const [pin, setPin] = useState("");
   const [text, setText] = useState("000000");
   const [timeStamp, setTimeStamp] = useState(0);
@@ -28,12 +26,16 @@ export default function App() {
   };
 
   const handleGenOTP = () => {
+    if (!pin) {
+      alert("Please enter pin");
+      return;
+    }
     const sharedKey = createSharedKey(pin);
     axios
       .post("http://192.168.1.21:3000/createOtpPin", {
-        mobileNumber: "0386170836",
+        mobileNumber: "0386170837",
         sharedKey,
-        deviceId: "iPhone13pro,2",
+        deviceId: "iPhone13pro,5",
       })
       .then((res) => {
         const { smartOtp, now } = createSmartOtp(sharedKey);
@@ -50,10 +52,10 @@ export default function App() {
       .post("http://192.168.1.21:3000/confirmOTP", {
         clientOTP: text,
         time: timeStamp,
-        deviceId: "iPhone13pro,2",
+        deviceId: "iPhone13pro,5",
       })
       .then((res) => {
-        console.log(res);
+        alert(res.data.msg);
       })
       .catch((err) => {
         console.log(err);
